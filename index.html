@@ -5,44 +5,128 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>首頁</title>
 	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;800&family=Outfit:wght@500;700&display=swap');
+
+		:root {
+			--ink: #edf6ff;
+			--muted: #c8d8ea;
+			--glass: rgba(15, 24, 48, 0.42);
+			--glass-line: rgba(173, 220, 255, 0.38);
+			--glow-a: #00d1c7;
+			--glow-b: #ff8f6b;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
 		body {
-			font-family: Arial, sans-serif;
-			background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+			font-family: 'Noto Sans TC', sans-serif;
 			margin: 0;
-			padding: 0;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			height: 100vh;
+			min-height: 100vh;
+			display: grid;
+			place-items: center;
+			padding: 24px;
+			color: var(--ink);
+			background:
+				radial-gradient(1000px 560px at 12% -10%, #1c8ea8 0%, transparent 60%),
+				radial-gradient(820px 520px at 86% 118%, #b45f4b 0%, transparent 65%),
+				linear-gradient(140deg, #071223 0%, #0d1d39 42%, #142947 100%);
+			overflow: hidden;
 		}
+
+		body::before,
+		body::after {
+			content: '';
+			position: fixed;
+			border-radius: 999px;
+			filter: blur(70px);
+			opacity: 0.5;
+			pointer-events: none;
+		}
+
+		body::before {
+			width: 260px;
+			height: 260px;
+			background: var(--glow-a);
+			left: -70px;
+			top: 14%;
+		}
+
+		body::after {
+			width: 300px;
+			height: 300px;
+			background: var(--glow-b);
+			right: -90px;
+			bottom: 8%;
+		}
+
 		.container {
+			width: min(92vw, 640px);
 			text-align: center;
-			background: #ffffff;
-			padding: 20px;
-			border-radius: 10px;
-			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			background: var(--glass);
+			border: 1px solid var(--glass-line);
+			padding: 34px 28px;
+			border-radius: 22px;
+			box-shadow: 0 22px 42px rgba(2, 8, 24, 0.46);
+			backdrop-filter: blur(14px);
+			animation: floatIn .7s ease both;
 		}
+
 		h1 {
-			color: #333;
-			margin-bottom: 20px;
+			font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+			font-weight: 700;
+			font-size: clamp(2.05rem, 5vw, 3.2rem);
+			letter-spacing: .05em;
+			margin: 0 0 10px;
 		}
+
+		.container::after {
+			content: 'Sorting Visualization Hub';
+			display: block;
+			margin-bottom: 20px;
+			color: var(--muted);
+			font-size: .93rem;
+			letter-spacing: .08em;
+		}
+
 		a {
 			text-decoration: none;
-			color: #007BFF;
-			font-size: 18px;
-			margin: 10px 0;
-			display: inline-block;
+			color: #f4fbff;
+			font-size: 1.08rem;
+			font-weight: 700;
+			display: block;
+			margin: 12px 0;
+			padding: 13px 16px;
+			border-radius: 12px;
+			background: linear-gradient(120deg, rgba(0, 209, 199, 0.26), rgba(255, 143, 107, 0.26));
+			border: 1px solid rgba(206, 233, 255, 0.45);
+			transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 		}
+
 		a:hover {
-			color: #0056b3;
+			transform: translateY(-2px);
+			box-shadow: 0 14px 24px rgba(7, 20, 44, 0.35);
+			border-color: rgba(255, 255, 255, 0.78);
+		}
+
+		@keyframes floatIn {
+			from {
+				opacity: 0;
+				transform: translateY(16px) scale(0.98);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0) scale(1);
+			}
 		}
 	</style>
 </head>
 <body>
 	<div class="container">
 		<h1>排序演算法</h1>
-		<a href="bubble-sort.html">前往 Bubble Sort 頁面</a><br>
-		<a href="selection-sort.html">前往 Selection Sort 頁面</a><br>
+		<a href="bubble-sort.html">前往 Bubble Sort 頁面</a>
+		<a href="selection-sort.html">前往 Selection Sort 頁面</a>
 		<a href="insertion-sort.html">前往 Insertion Sort 頁面</a>
 	</div>
 </body>

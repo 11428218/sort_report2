@@ -5,63 +5,112 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>插入排序法 視覺化</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;800&family=Outfit:wght@500;700&display=swap');
+
+    :root {
+      --bg-base: #081427;
+      --bg-soft: #0f2340;
+      --txt: #edf6ff;
+      --txt-dim: #c2d7eb;
+      --line: rgba(182, 224, 255, 0.34);
+      --glass: rgba(11, 25, 48, 0.42);
+      --glass-strong: rgba(8, 19, 37, 0.64);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
+      font-family: 'Noto Sans TC', sans-serif;
+      color: var(--txt);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 24px 16px;
+      background:
+        radial-gradient(900px 540px at 8% -10%, #1e7f9f 0%, transparent 62%),
+        radial-gradient(780px 520px at 96% 120%, #9e5747 0%, transparent 68%),
+        linear-gradient(135deg, var(--bg-base), var(--bg-soft));
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      border-radius: 999px;
+      filter: blur(70px);
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    body::before {
+      width: 240px;
+      height: 240px;
+      left: -60px;
+      top: 24%;
+      background: #05d4c4;
+    }
+
+    body::after {
+      width: 300px;
+      height: 300px;
+      right: -100px;
+      bottom: 2%;
+      background: #ff8f6b;
     }
 
     h1 {
-      font-size: 2rem;
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
       font-weight: 700;
-      background: linear-gradient(90deg, #fb923c, #f43f5e);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.04em;
       margin-bottom: 8px;
+      color: #ebf7ff;
+      text-shadow: 0 0 20px rgba(95, 212, 255, 0.28);
     }
 
     .subtitle {
-      color: #94a3b8;
+      color: var(--txt-dim);
       font-size: 0.95rem;
       margin-bottom: 28px;
+      letter-spacing: .03em;
     }
 
     .back-home {
-      color: #7dd3fc;
+      color: #f3fbff;
       text-decoration: none;
-      border: 1px solid #334155;
-      background: #1e293b;
+      border: 1px solid rgba(202, 233, 255, 0.6);
+      background: rgba(13, 28, 51, 0.44);
       border-radius: 9999px;
       padding: 6px 14px;
       font-size: 0.88rem;
       margin-bottom: 20px;
-      transition: background 0.2s, color 0.2s;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
+
     .back-home:hover {
-      background: #0b3352;
-      color: #bae6fd;
+      transform: translateY(-1px);
+      border-color: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
     }
 
     .principle {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
+      background: var(--glass);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+      border-radius: 14px;
       padding: 16px 24px;
       max-width: 760px;
       width: 100%;
       margin-bottom: 28px;
-      line-height: 1.7;
+      line-height: 1.75;
       font-size: 0.93rem;
-      color: #cbd5e1;
+      color: #d7e8fa;
+      box-shadow: 0 14px 30px rgba(4, 11, 29, 0.32);
     }
-    .principle strong { color: #fb923c; }
+
+    .principle strong { color: #ffd1bf; }
 
     .info-bar {
       display: flex;
@@ -70,46 +119,59 @@
       justify-content: center;
       margin-bottom: 20px;
     }
+
     .info-pill {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: var(--glass);
+      border: 1px solid var(--line);
       border-radius: 9999px;
       padding: 6px 18px;
       font-size: 0.88rem;
-      color: #94a3b8;
+      color: #c9dcf0;
+      backdrop-filter: blur(12px);
     }
-    .info-pill span { color: #f1f5f9; font-weight: 600; }
+
+    .info-pill span { color: #f1f8ff; font-weight: 600; }
 
     .step-msg {
-      background: #1e3a5f;
-      border: 1px solid #2563eb;
+      background: rgba(8, 20, 39, 0.74);
+      border: 1px solid rgba(173, 220, 250, 0.38);
+      border-left: 4px solid #5fd2ff;
       border-radius: 10px;
       padding: 10px 22px;
       font-size: 0.93rem;
-      color: #bfdbfe;
+      color: #e5f2ff;
       margin-bottom: 22px;
       text-align: center;
       min-height: 42px;
       max-width: 760px;
       width: 100%;
+      backdrop-filter: blur(10px);
     }
 
     .chart-wrap {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: var(--glass);
+      border: 1px solid var(--line);
       border-radius: 14px;
       padding: 20px 24px 12px;
       max-width: 760px;
       width: 100%;
       margin-bottom: 24px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 14px 30px rgba(4, 11, 29, 0.32);
     }
+
     .bars {
       display: flex;
       align-items: flex-end;
       justify-content: center;
       gap: 6px;
       height: 260px;
+      background: rgba(8, 20, 39, 0.45);
+      border-radius: 10px;
+      border: 1px solid rgba(173, 220, 250, 0.22);
+      padding: 4px;
     }
+
     .bar-col {
       display: flex;
       flex-direction: column;
@@ -117,91 +179,121 @@
       flex: 1;
       max-width: 52px;
     }
+
     .bar {
       width: 100%;
-      border-radius: 6px 6px 0 0;
+      border-radius: 8px 8px 0 0;
       transition: height 0.25s ease, background 0.2s;
-      background: #38bdf8;
+      background: #56cbff;
+      box-shadow: 0 0 14px rgba(86, 203, 255, 0.3);
     }
-    .bar.comparing   { background: #f59e0b; }
-    .bar.inserting   { background: #f97316; }
-    .bar.sorted      { background: #4ade80; }
+
+    .bar.comparing { background: #ffcb77; }
+    .bar.inserting { background: #ffae8e; }
+    .bar.sorted { background: #6de8a6; }
 
     .bar-label {
       margin-top: 6px;
       font-size: 0.82rem;
-      color: #94a3b8;
+      color: #bed3e8;
       font-weight: 600;
     }
 
     .controls {
-      display: flex; flex-wrap: wrap; gap: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
       justify-content: center;
-      max-width: 760px; width: 100%;
+      max-width: 760px;
+      width: 100%;
       margin-bottom: 24px;
     }
+
     button {
       padding: 10px 22px;
-      border: none; border-radius: 9999px;
-      font-size: 0.9rem; font-weight: 600;
-      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+      border: 1px solid rgba(224, 241, 255, 0.32);
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #f7fbff;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .2s ease, opacity .2s;
     }
+
     button:active { transform: scale(0.96); }
+    button:hover { box-shadow: 0 10px 18px rgba(7, 20, 41, 0.35); }
     button:disabled { opacity: 0.35; cursor: not-allowed; }
 
-    #btnStart  { background: #2563eb; color: #fff; }
-    #btnPause  { background: #d97706; color: #fff; }
-    #btnStep   { background: #7c3aed; color: #fff; }
-    #btnReset  { background: #475569; color: #fff; }
-    #btnRandom { background: #0f766e; color: #fff; }
-    #btnApply  { background: #be185d; color: #fff; padding: 8px 16px; border-radius: 8px; }
+    #btnStart { background: linear-gradient(120deg, #24a9de, #3d8ee7); }
+    #btnPause { background: linear-gradient(120deg, #ea9d4d, #db6f69); }
+    #btnStep { background: linear-gradient(120deg, #7ea7e8, #9d95e9); }
+    #btnReset { background: linear-gradient(120deg, #4e6582, #697d95); }
+    #btnRandom { background: linear-gradient(120deg, #21b67f, #1ecf8d); }
+    #btnApply {
+      background: linear-gradient(120deg, #cf6984, #a75a8f);
+      padding: 8px 16px;
+      border-radius: 10px;
+    }
 
     .speed-wrap {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 0.88rem; color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: #c7dbee;
     }
-    input[type=range] { accent-color: #fb923c; width: 110px; }
+
+    input[type=range] { accent-color: #66d4ff; width: 110px; }
 
     .size-wrap {
-      display: flex; align-items: center; gap: 8px;
-      background: #1e293b;
-      border: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(8, 20, 39, 0.58);
+      border: 1px solid rgba(173, 220, 250, 0.25);
       border-radius: 9999px;
       padding: 6px 16px;
-      font-size: 0.88rem; color: #94a3b8;
+      font-size: 0.88rem;
+      color: #c7dbee;
+      backdrop-filter: blur(10px);
     }
+
     input[type=number] {
       width: 56px;
       padding: 4px 8px;
-      background: #0f172a;
-      border: 1px solid #475569;
-      border-radius: 6px;
-      color: #f1f5f9;
+      background: rgba(7, 18, 34, 0.82);
+      border: 1px solid rgba(177, 220, 249, 0.38);
+      border-radius: 7px;
+      color: #f1f8ff;
       font-size: 0.9rem;
       text-align: center;
     }
+
     input[type=number]:focus {
       outline: none;
-      border-color: #fb923c;
+      border-color: #9fdcff;
     }
 
     .code-box {
-      background: #0f172a;
-      border: 1px solid #334155;
+      background: rgba(8, 20, 39, 0.74);
+      border: 1px solid rgba(173, 220, 250, 0.22);
       border-radius: 12px;
       padding: 18px 24px;
-      max-width: 760px; width: 100%;
+      max-width: 760px;
+      width: 100%;
       font-family: 'Consolas', monospace;
       font-size: 0.88rem;
       line-height: 1.9;
-      color: #94a3b8;
+      color: #c2d6eb;
+      backdrop-filter: blur(10px);
     }
+
     .code-line { padding: 1px 8px; border-radius: 4px; transition: background 0.2s; }
-    .code-line.highlight { background: #1e3a5f; color: #bfdbfe; }
-    .code-line .kw  { color: #818cf8; }
-    .code-line .fn  { color: #fb923c; }
-    .code-line .cm  { color: #475569; }
-    .code-line .num { color: #fdba74; }
+    .code-line.highlight { background: rgba(84, 153, 232, 0.26); color: #e7f2ff; }
+    .code-line .kw { color: #9fd4ff; }
+    .code-line .fn { color: #ffb9a2; }
+    .code-line .cm { color: #7692af; }
+    .code-line .num { color: #ffd095; }
 
     .section-title {
       max-width: 760px;
@@ -209,8 +301,9 @@
       margin: 0 0 14px;
       font-size: 1.1rem;
       font-weight: 700;
-      color: #f8fafc;
+      color: #edf6ff;
       text-align: left;
+      letter-spacing: .03em;
     }
   </style>
 </head>
