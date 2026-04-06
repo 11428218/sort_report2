@@ -4,7 +4,7 @@
 
 姓名：蔡名瑜
 
-模擬頁面：[點此進入](index.html)
+模擬頁面：[[點此進入](index.html)](https://11428218.github.io/sort_report2/)
 
 ---
 
