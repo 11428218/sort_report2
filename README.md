@@ -7,32 +7,6 @@
 模擬頁面：[[點此進入](index.html)](https://11428218.github.io/sort_report2/)
 
 ---
-
-## 專題說明
-
-本專題以三個常見排序演算法為主，製作成可互動的視覺化網頁，讓使用者能直接觀察排序過程中的比較、交換與資料位移情形。
-
-目前完成的頁面如下：
-
-1. [首頁導覽](index.html)
-2. [Bubble Sort 視覺化](bubble-sort.html)
-3. [Selection Sort 視覺化](selection-sort.html)
-4. [Insertion Sort 視覺化](insertion-sort.html)
-
----
-
-## 首頁導覽
-
-首頁採卡片式版面，提供三個排序頁面的入口：
-
-1. 前往 Bubble Sort 頁面
-2. 前往 Selection Sort 頁面
-3. 前往 Insertion Sort 頁面
-
-這個頁面主要功能是集中導覽，讓報告閱讀者可以快速切換到各排序演算法的實作頁。
-
----
-
 ## 氣泡排序法（Bubble Sort）
 
 ### 原理簡述
