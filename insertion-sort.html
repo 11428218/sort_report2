@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>插入排序法 視覺化</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #fb923c, #f43f5e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+
+    .back-home {
+      color: #7dd3fc;
+      text-decoration: none;
+      border: 1px solid #334155;
+      background: #1e293b;
+      border-radius: 9999px;
+      padding: 6px 14px;
+      font-size: 0.88rem;
+      margin-bottom: 20px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .back-home:hover {
+      background: #0b3352;
+      color: #bae6fd;
+    }
+
+    .principle {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 16px 24px;
+      max-width: 760px;
+      width: 100%;
+      margin-bottom: 28px;
+      line-height: 1.7;
+      font-size: 0.93rem;
+      color: #cbd5e1;
+    }
+    .principle strong { color: #fb923c; }
+
+    .info-bar {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .info-pill {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 9999px;
+      padding: 6px 18px;
+      font-size: 0.88rem;
+      color: #94a3b8;
+    }
+    .info-pill span { color: #f1f5f9; font-weight: 600; }
+
+    .step-msg {
+      background: #1e3a5f;
+      border: 1px solid #2563eb;
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-size: 0.93rem;
+      color: #bfdbfe;
+      margin-bottom: 22px;
+      text-align: center;
+      min-height: 42px;
+      max-width: 760px;
+      width: 100%;
+    }
+
+    .chart-wrap {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 20px 24px 12px;
+      max-width: 760px;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+    .bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 6px;
+      height: 260px;
+    }
+    .bar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      max-width: 52px;
+    }
+    .bar {
+      width: 100%;
+      border-radius: 6px 6px 0 0;
+      transition: height 0.25s ease, background 0.2s;
+      background: #38bdf8;
+    }
+    .bar.comparing   { background: #f59e0b; }
+    .bar.inserting   { background: #f97316; }
+    .bar.sorted      { background: #4ade80; }
+
+    .bar-label {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 12px;
+      justify-content: center;
+      max-width: 760px; width: 100%;
+      margin-bottom: 24px;
+    }
+    button {
+      padding: 10px 22px;
+      border: none; border-radius: 9999px;
+      font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+    }
+    button:active { transform: scale(0.96); }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    #btnStart  { background: #2563eb; color: #fff; }
+    #btnPause  { background: #d97706; color: #fff; }
+    #btnStep   { background: #7c3aed; color: #fff; }
+    #btnReset  { background: #475569; color: #fff; }
+    #btnRandom { background: #0f766e; color: #fff; }
+    #btnApply  { background: #be185d; color: #fff; padding: 8px 16px; border-radius: 8px; }
+
+    .speed-wrap {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.88rem; color: #94a3b8;
+    }
+    input[type=range] { accent-color: #fb923c; width: 110px; }
+
+    .size-wrap {
+      display: flex; align-items: center; gap: 8px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 9999px;
+      padding: 6px 16px;
+      font-size: 0.88rem; color: #94a3b8;
+    }
+    input[type=number] {
+      width: 56px;
+      padding: 4px 8px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      color: #f1f5f9;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    input[type=number]:focus {
+      outline: none;
+      border-color: #fb923c;
+    }
+
+    .code-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 18px 24px;
+      max-width: 760px; width: 100%;
+      font-family: 'Consolas', monospace;
+      font-size: 0.88rem;
+      line-height: 1.9;
+      color: #94a3b8;
+    }
+    .code-line { padding: 1px 8px; border-radius: 4px; transition: background 0.2s; }
+    .code-line.highlight { background: #1e3a5f; color: #bfdbfe; }
+    .code-line .kw  { color: #818cf8; }
+    .code-line .fn  { color: #fb923c; }
+    .code-line .cm  { color: #475569; }
+    .code-line .num { color: #fdba74; }
+
+    .section-title {
+      max-width: 760px;
+      width: 100%;
+      margin: 0 0 14px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f8fafc;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 插入排序法</h1>
+  <p class="subtitle">Insertion Sort — 模擬實作內容</p>
+  <a class="back-home" href="index.html">← 回首頁</a>
+
+  <div class="principle">
+    <strong>原理：</strong>
+    插入排序法會<strong>逐一將元素插入到已排序區域的正確位置</strong>。
+    每次插入後，已排序區域擴大一格，直到所有元素排序完成。
+    <br/><br/>
+    ⏱ 時間複雜度：最差 / 平均為 <strong>O(n²)</strong>，最佳為 <strong>O(n)</strong>（已排序陣列）。
+  </div>
+
+  <div class="info-bar">
+    <div class="info-pill">第 <span id="infoPass">0</span> 輪 / 共 <span id="infoTotal">0</span> 輪</div>
+    <div class="info-pill">比較次數：<span id="infoCmp">0</span></div>
+    <div class="info-pill">移動次數：<span id="infoMov">0</span></div>
+    <div class="info-pill">狀態：<span id="infoState">就緒</span></div>
+  </div>
+
+  <div class="step-msg" id="stepMsg">按「▶ 開始」自動播放，或按「單步」逐步觀察每一次插入。</div>
+
+  <div class="chart-wrap">
+    <div class="bars" id="bars"></div>
+  </div>
+
+  <h2 class="section-title">四、模擬實作內容</h2>
+
+  <div class="controls">
+    <button id="btnStart"  onclick="startAuto()">▶ 開始</button>
+    <button id="btnPause"  onclick="pauseAuto()" disabled>⏸ 暫停</button>
+    <button id="btnStep"   onclick="doStep()">👟 單步</button>
+    <button id="btnReset"  onclick="resetSort()">↺ 重置</button>
+    <button id="btnRandom" onclick="randomArray()">🎲 亂數陣列</button>
+    <div class="size-wrap">
+      元素個數：
+      <input type="number" id="arrSize" min="3" max="15" value="7"
+             onkeydown="if(event.key==='Enter') applySize()" />
+      <button id="btnApply" onclick="applySize()">套用</button>
+    </div>
+    <div class="speed-wrap">
+      🐢 <input type="range" id="speedRange" min="100" max="1800" step="100" value="700"
+               oninput="updateSpeed(this.value)"> 🐇
+      <span id="speedLabel">700ms</span>
+    </div>
+  </div>
+
+  <div class="code-box" id="codeBox">
+    <div class="code-line" id="cl0"><span class="kw">function</span> <span class="fn">insertionSort</span>(arr) {</div>
+    <div class="code-line" id="cl1">&nbsp;&nbsp;<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">1</span>; i &lt; arr.length; i++) {</div>
+    <div class="code-line" id="cl2">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">let</span> key = arr[i];</div>
+    <div class="code-line" id="cl3">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">let</span> j = i - <span class="num">1</span>;</div>
+    <div class="code-line" id="cl4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">while</span> (j &gt;= <span class="num">0</span> &amp;&amp; arr[j] &gt; key) {</div>
+    <div class="code-line" id="cl5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arr[j + <span class="num">1</span>] = arr[j];</div>
+    <div class="code-line" id="cl6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j--;</div>
+    <div class="code-line" id="cl7">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+    <div class="code-line" id="cl8">&nbsp;&nbsp;&nbsp;&nbsp;arr[j + <span class="num">1</span>] = key;</div>
+    <div class="code-line" id="cl9">&nbsp;&nbsp;}</div>
+    <div class="code-line" id="cl10">}</div>
+  </div>
+
+<script>
+// 插入排序法的互動邏輯
+let arr = [64, 34, 25, 12, 22, 11, 90];
+const MAX_H = 220;
+let steps = [];
+let stepIdx = 0;
+let autoTimer = null;
+let delay = 700;
+
+function computeSteps(a) {
+  const s = [];
+  const data = [...a];
+  s.push({ arr: [...data], msg: '開始插入排序', code: 0 });
+  for (let i = 1; i < data.length; i++) {
+    let key = data[i];
+    let j = i - 1;
+    while (j >= 0 && data[j] > key) {
+      data[j + 1] = data[j];
+      j--;
+      s.push({ arr: [...data], i, j, key, msg: `移動元素 ${data[j + 1]}`, code: 5 });
+    }
+    data[j + 1] = key;
+    s.push({ arr: [...data], i, j, key, msg: `插入元素 ${key}`, code: 8 });
+  }
+  s.push({ arr: [...data], msg: '排序完成', code: 10 });
+  return s;
+}
+
+function render(state) {
+  const wrap = document.getElementById('bars');
+  wrap.innerHTML = '';
+  const maxVal = Math.max(...state.arr);
+  const { i, j, key } = state;
+
+  state.arr.forEach((v, idx) => {
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    const h = Math.max(18, Math.round((v / maxVal) * MAX_H));
+    bar.style.height = h + 'px';
+
+    if (idx === j + 1 && key !== undefined) {
+      bar.classList.add('inserting');
+    } else if (idx <= i) {
+      bar.classList.add('sorted');
+    }
+
+    const lbl = document.createElement('div');
+    lbl.className = 'bar-label';
+    lbl.textContent = v;
+
+    col.appendChild(bar);
+    col.appendChild(lbl);
+    wrap.appendChild(col);
+  });
+
+  document.getElementById('stepMsg').textContent = state.msg;
+
+  // 更新狀態資訊
+  document.getElementById('infoPass').textContent = i || 0;
+  document.getElementById('infoCmp').textContent = steps.filter(s => s.code === 5).length;
+  document.getElementById('infoMov').textContent = steps.filter(s => s.code === 8).length;
+  document.getElementById('infoState').textContent = stepIdx === steps.length - 1 ? '完成 ✅' : '進行中';
+}
+
+function doStep() {
+  if (stepIdx < steps.length - 1) {
+    stepIdx++;
+    render(steps[stepIdx]);
+  }
+  if (stepIdx === steps.length - 1) {
+    stopAuto();
+    document.getElementById('btnStart').disabled = true;
+    document.getElementById('btnStep').disabled = true;
+  }
+}
+
+function startAuto() {
+  if (stepIdx >= steps.length - 1) return;
+  document.getElementById('btnStart').disabled = true;
+  document.getElementById('btnPause').disabled = false;
+  document.getElementById('btnStep').disabled = true;
+  autoTimer = setInterval(() => {
+    if (stepIdx >= steps.length - 1) {
+      stopAuto();
+      return;
+    }
+    doStep();
+  }, delay);
+}
+
+function pauseAuto() {
+  stopAuto();
+  document.getElementById('btnStart').disabled = false;
+  document.getElementById('btnPause').disabled = true;
+  document.getElementById('btnStep').disabled = false;
+}
+
+function stopAuto() {
+  clearInterval(autoTimer);
+  autoTimer = null;
+  document.getElementById('btnPause').disabled = true;
+}
+
+function resetSort() {
+  stopAuto();
+  steps = computeSteps(arr);
+  stepIdx = 0;
+  document.getElementById('btnStart').disabled = false;
+  document.getElementById('btnStep').disabled = false;
+  render(steps[0]);
+}
+
+function randomArray() {
+  stopAuto();
+  const sizeInput = document.getElementById('arrSize');
+  const size = Math.min(15, Math.max(3, parseInt(sizeInput.value) || 7));
+  sizeInput.value = size;
+  arr = Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
+  resetSort();
+}
+
+function applySize() {
+  const sizeInput = document.getElementById('arrSize');
+  const size = Math.min(15, Math.max(3, parseInt(sizeInput.value) || 7));
+  sizeInput.value = size;
+  stopAuto();
+  arr = Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
+  resetSort();
+}
+
+function updateSpeed(v) {
+  delay = 1900 - Number(v);
+  document.getElementById('speedLabel').textContent = delay + 'ms';
+  if (autoTimer) {
+    pauseAuto();
+    startAuto();
+  }
+}
+
+// 初始化
+steps = computeSteps(arr);
+render(steps[0]);
+</script>
+</body>
+</html>

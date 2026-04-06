@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>選擇排序法 視覺化</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #fb923c, #f43f5e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+
+    .back-home {
+      color: #7dd3fc;
+      text-decoration: none;
+      border: 1px solid #334155;
+      background: #1e293b;
+      border-radius: 9999px;
+      padding: 6px 14px;
+      font-size: 0.88rem;
+      margin-bottom: 20px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .back-home:hover {
+      background: #0b3352;
+      color: #bae6fd;
+    }
+
+    /* ── 說明區 ── */
+    .principle {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 16px 24px;
+      max-width: 760px;
+      width: 100%;
+      margin-bottom: 28px;
+      line-height: 1.7;
+      font-size: 0.93rem;
+      color: #cbd5e1;
+    }
+    .principle strong { color: #fb923c; }
+
+    /* ── 狀態資訊列 ── */
+    .info-bar {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .info-pill {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 9999px;
+      padding: 6px 18px;
+      font-size: 0.88rem;
+      color: #94a3b8;
+    }
+    .info-pill span { color: #f1f5f9; font-weight: 600; }
+
+    /* ── 步驟說明 ── */
+    .step-msg {
+      background: #1e3a5f;
+      border: 1px solid #2563eb;
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-size: 0.93rem;
+      color: #bfdbfe;
+      margin-bottom: 22px;
+      text-align: center;
+      min-height: 42px;
+      max-width: 760px;
+      width: 100%;
+    }
+
+    /* ── 長條圖 ── */
+    .chart-wrap {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 20px 24px 12px;
+      max-width: 760px;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+    .bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 6px;
+      height: 260px;
+    }
+    .bar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      max-width: 52px;
+    }
+    .bar {
+      width: 100%;
+      border-radius: 6px 6px 0 0;
+      transition: height 0.25s ease, background 0.2s;
+      background: #38bdf8;
+    }
+    .bar.comparing   { background: #f59e0b; }
+    .bar.minimum     { background: #f97316; }
+    .bar.swapping    { background: #f43f5e; }
+    .bar.sorted      { background: #4ade80; }
+    .bar.pass-start  { background: #818cf8; }
+
+    .bar-label {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    /* ── 圖例 ── */
+    .legend {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 10px;
+      font-size: 0.82rem; color: #94a3b8;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot  { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+
+    /* ── 控制列 ── */
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 12px;
+      justify-content: center;
+      max-width: 760px; width: 100%;
+      margin-bottom: 24px;
+    }
+    button {
+      padding: 10px 22px;
+      border: none; border-radius: 9999px;
+      font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+    }
+    button:active { transform: scale(0.96); }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    #btnStart  { background: #2563eb; color: #fff; }
+    #btnPause  { background: #d97706; color: #fff; }
+    #btnStep   { background: #7c3aed; color: #fff; }
+    #btnReset  { background: #475569; color: #fff; }
+    #btnRandom { background: #0f766e; color: #fff; }
+    #btnApply  { background: #be185d; color: #fff; padding: 8px 16px; border-radius: 8px; }
+
+    .speed-wrap {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.88rem; color: #94a3b8;
+    }
+    input[type=range] { accent-color: #fb923c; width: 110px; }
+
+    /* ── 元素個數設定 ── */
+    .size-wrap {
+      display: flex; align-items: center; gap: 8px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 9999px;
+      padding: 6px 16px;
+      font-size: 0.88rem; color: #94a3b8;
+    }
+    input[type=number] {
+      width: 56px;
+      padding: 4px 8px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      color: #f1f5f9;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    input[type=number]:focus {
+      outline: none;
+      border-color: #fb923c;
+    }
+
+    /* ── 偽代碼 ── */
+    .code-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 18px 24px;
+      max-width: 760px; width: 100%;
+      font-family: 'Consolas', monospace;
+      font-size: 0.88rem;
+      line-height: 1.9;
+      color: #94a3b8;
+    }
+    .code-line { padding: 1px 8px; border-radius: 4px; transition: background 0.2s; }
+    .code-line.highlight { background: #1e3a5f; color: #bfdbfe; }
+    .code-line .kw  { color: #818cf8; }
+    .code-line .fn  { color: #fb923c; }
+    .code-line .cm  { color: #475569; }
+    .code-line .num { color: #fdba74; }
+  </style>
+</head>
+<body>
+
+  <h1>🔍 選擇排序法</h1>
+  <p class="subtitle">Selection Sort — 視覺化步驟演示</p>
+  <a class="back-home" href="index.html">← 回首頁</a>
+
+  <div class="principle">
+    <strong>原理：</strong>
+    選擇排序法每一輪（Pass）會<strong>掃描未排序的部分，找出最小值</strong>，再將它與未排序區域的第一個元素<strong>交換</strong>位置。
+    每輪結束後，最小值被擺到正確位置，已排序區域擴大一格。重複 <em>n-1</em> 輪後，所有元素排列完成。
+    <br/><br/>
+    ⏱ 時間複雜度：最差 / 平均 / 最佳 均為 <strong>O(n²)</strong>。每輪僅做 <strong>最多 1 次交換</strong>，交換次數上限為 <em>n-1</em> 次。
+  </div>
+
+  <div class="info-bar">
+    <div class="info-pill">第 <span id="infoPass">0</span> 輪 / 共 <span id="infoTotal">0</span> 輪</div>
+    <div class="info-pill">比較次數：<span id="infoCmp">0</span></div>
+    <div class="info-pill">交換次數：<span id="infoSwp">0</span></div>
+    <div class="info-pill">狀態：<span id="infoState">就緒</span></div>
+  </div>
+
+  <div class="step-msg" id="stepMsg">按「▶ 開始」自動播放，或按「單步」逐步觀察每一次比較。</div>
+
+  <div class="chart-wrap">
+    <div class="bars" id="bars"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#38bdf8"></div>未排序</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#818cf8"></div>輪起始位置</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>掃描比較中</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>目前最小值</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f43f5e"></div>交換中</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div>已排序</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="btnStart"  onclick="startAuto()">▶ 開始</button>
+    <button id="btnPause"  onclick="pauseAuto()" disabled>⏸ 暫停</button>
+    <button id="btnStep"   onclick="doStep()">👟 單步</button>
+    <button id="btnReset"  onclick="resetSort()">↺ 重置</button>
+    <button id="btnRandom" onclick="randomArray()">🎲 亂數陣列</button>
+    <div class="size-wrap">
+      元素個數：
+      <input type="number" id="arrSize" min="3" max="15" value="7"
+             onkeydown="if(event.key==='Enter') applySize()" />
+      <button id="btnApply" onclick="applySize()">套用</button>
+    </div>
+    <div class="speed-wrap">
+      🐢 <input type="range" id="speedRange" min="100" max="1800" step="100" value="700"
+               oninput="updateSpeed(this.value)"> 🐇
+      <span id="speedLabel">700ms</span>
+    </div>
+  </div>
+
+  <div class="code-box" id="codeBox">
+    <div class="code-line" id="cl0"><span class="kw">function</span> <span class="fn">selectionSort</span>(arr) {</div>
+    <div class="code-line" id="cl1">&nbsp;&nbsp;<span class="kw">let</span> n = arr.length</div>
+    <div class="code-line" id="cl2">&nbsp;&nbsp;<span class="kw">for</span> (i = <span class="num">0</span>; i &lt; n<span class="num">-1</span>; i++) {            <span class="cm">// 第 i 輪</span></div>
+    <div class="code-line" id="cl3">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">let</span> minIdx = i                          <span class="cm">// 假設 i 為最小值位置</span></div>
+    <div class="code-line" id="cl4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">for</span> (j = i+<span class="num">1</span>; j &lt; n; j++) {         <span class="cm">// 尋找更小的值</span></div>
+    <div class="code-line" id="cl5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (arr[j] &lt; arr[minIdx]) {          <span class="cm">// 找到更小的？</span></div>
+    <div class="code-line" id="cl6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minIdx = j                          <span class="cm">// 更新最小值位置</span></div>
+    <div class="code-line" id="cl7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+    <div class="code-line" id="cl8">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+    <div class="code-line" id="cl9">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (minIdx !== i) {                    <span class="cm">// 需要交換？</span></div>
+    <div class="code-line" id="cl10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[arr[i], arr[minIdx]] = [arr[minIdx], arr[i]]  <span class="cm">// 交換！</span></div>
+    <div class="code-line" id="cl11">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+    <div class="code-line" id="cl12">&nbsp;&nbsp;}                                          <span class="cm">// arr[i] 已就位</span></div>
+    <div class="code-line" id="cl13">}</div>
+  </div>
+
+<script>
+// ── 資料 ──────────────────────────────────────────────
+let arr = [64, 34, 25, 12, 22, 11, 90];
+const MAX_H = 220;
+
+// ── 排序狀態機 ─────────────────────────────────────────
+let steps = [];
+let stepIdx = 0;
+let autoTimer = null;
+let delay = 700;
+
+// 預計算所有步驟
+function computeSteps(a) {
+  const s = [];
+  const data = [...a];
+  const n = data.length;
+  const sorted = new Set();
+
+  s.push({
+    arr: [...data], i: -1, j: -1, minIdx: -1, phase: 'init',
+    sorted: new Set(sorted),
+    msg: '開始選擇排序，陣列共 ' + n + ' 個元素。',
+    code: 1
+  });
+
+  for (let i = 0; i < n - 1; i++) {
+
+    // 外層迴圈開始，設定初始 minIdx = i
+    s.push({
+      arr: [...data], i, j: -1, minIdx: i, phase: 'setMin',
+      sorted: new Set(sorted),
+      msg: `第 ${i+1} 輪開始：假設位置 ${i}（值 ${data[i]}）為目前最小值。`,
+      code: 3
+    });
+
+    let minIdx = i;
+
+    for (let j = i + 1; j < n; j++) {
+
+      // 比較 arr[j] 與 arr[minIdx]
+      s.push({
+        arr: [...data], i, j, minIdx, phase: 'compare',
+        sorted: new Set(sorted),
+        msg: `比較 arr[${j}]=${data[j]} 與目前最小值 arr[${minIdx}]=${data[minIdx]}`,
+        code: 5
+      });
+
+      if (data[j] < data[minIdx]) {
+        minIdx = j;
+        s.push({
+          arr: [...data], i, j, minIdx, phase: 'foundMin',
+          sorted: new Set(sorted),
+          msg: `找到更小的值！更新 minIdx 為 ${j}（值 ${data[j]}）。`,
+          code: 6
+        });
+      } else {
+        s.push({
+          arr: [...data], i, j, minIdx, phase: 'noChange',
+          sorted: new Set(sorted),
+          msg: `arr[${j}]=${data[j]} ≥ 最小值 ${data[minIdx]}，不更新 minIdx。`,
+          code: 7
+        });
+      }
+    }
+
+    // 內層迴圈結束，判斷是否需要交換
+    s.push({
+      arr: [...data], i, j: -1, minIdx, phase: 'preSwap',
+      sorted: new Set(sorted),
+      msg: `掃描完畢，最小值在位置 ${minIdx}（值 ${data[minIdx]}）。` +
+           (minIdx !== i
+             ? ` 需與位置 ${i}（值 ${data[i]}）交換。`
+             : ` 已在正確位置，不需交換。`),
+      code: 9
+    });
+
+    if (minIdx !== i) {
+      const valI   = data[i];
+      const valMin = data[minIdx];
+      [data[i], data[minIdx]] = [data[minIdx], data[i]];
+      s.push({
+        arr: [...data], i, j: -1, minIdx, phase: 'swap',
+        sorted: new Set(sorted),
+        msg: `交換 arr[${i}]（原值 ${valI}）↔ arr[${minIdx}]（原值 ${valMin}）！`,
+        code: 10
+      });
+    }
+
+    sorted.add(i);
+    s.push({
+      arr: [...data], i, j: -1, minIdx, phase: 'endPass',
+      sorted: new Set(sorted),
+      msg: `第 ${i+1} 輪結束，位置 ${i} 的元素 ${data[i]} 已就位。`,
+      code: 12
+    });
+  }
+
+  // 最後一個元素自動到位
+  sorted.add(n - 1);
+  s.push({
+    arr: [...data], i: n-1, j: -1, minIdx: n-1, phase: 'done',
+    sorted: new Set(sorted),
+    msg: '🎉 排序完成！所有元素已由小到大排列。',
+    code: 13
+  });
+
+  return s;
+}
+
+// ── 渲染 ──────────────────────────────────────────────
+function render(state) {
+  const wrap = document.getElementById('bars');
+  wrap.innerHTML = '';
+  const maxVal = Math.max(...state.arr);
+  const { i, j, minIdx, phase, sorted } = state;
+
+  state.arr.forEach((v, idx) => {
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    const h = Math.max(18, Math.round((v / maxVal) * MAX_H));
+    bar.style.height = h + 'px';
+
+    if (sorted.has(idx)) {
+      bar.classList.add('sorted');
+    } else if (phase === 'swap' && (idx === i || idx === minIdx)) {
+      bar.classList.add('swapping');
+    } else if (idx === minIdx && minIdx >= 0) {
+      bar.classList.add('minimum');
+    } else if (idx === j && j >= 0) {
+      bar.classList.add('comparing');
+    } else if (idx === i && i >= 0) {
+      bar.classList.add('pass-start');
+    }
+
+    const lbl = document.createElement('div');
+    lbl.className = 'bar-label';
+    lbl.textContent = v;
+
+    col.appendChild(bar);
+    col.appendChild(lbl);
+    wrap.appendChild(col);
+  });
+
+  document.getElementById('stepMsg').textContent = state.msg;
+
+  // 代碼行高亮
+  for (let k = 0; k <= 13; k++) {
+    document.getElementById('cl' + k).classList.remove('highlight');
+  }
+  if (state.code >= 0) document.getElementById('cl' + state.code).classList.add('highlight');
+
+  // 資訊列
+  const pass = state.i >= 0 ? state.i + 1 : 0;
+  document.getElementById('infoPass').textContent  = pass;
+  document.getElementById('infoTotal').textContent = state.arr.length - 1;
+
+  // 累積比較 / 交換（到目前步驟）
+  let c = 0, sw = 0;
+  for (let k = 0; k <= stepIdx; k++) {
+    if (steps[k].code === 5) c++;
+    if (steps[k].phase === 'swap') sw++;
+  }
+  document.getElementById('infoCmp').textContent = c;
+  document.getElementById('infoSwp').textContent = sw;
+
+  const isLast = stepIdx === steps.length - 1;
+  document.getElementById('infoState').textContent =
+    isLast ? '完成 ✅' : autoTimer ? '播放中' : '暫停';
+}
+
+// ── 控制 ──────────────────────────────────────────────
+function doStep() {
+  if (stepIdx < steps.length - 1) {
+    stepIdx++;
+    render(steps[stepIdx]);
+  }
+  if (stepIdx === steps.length - 1) {
+    stopAuto();
+    document.getElementById('btnStart').disabled = true;
+    document.getElementById('btnStep').disabled  = true;
+  }
+}
+
+function startAuto() {
+  if (stepIdx >= steps.length - 1) return;
+  document.getElementById('btnStart').disabled = true;
+  document.getElementById('btnPause').disabled = false;
+  document.getElementById('btnStep').disabled  = true;
+  autoTimer = setInterval(() => {
+    if (stepIdx >= steps.length - 1) { stopAuto(); return; }
+    doStep();
+  }, delay);
+}
+
+function pauseAuto() {
+  stopAuto();
+  document.getElementById('btnStart').disabled = false;
+  document.getElementById('btnPause').disabled = true;
+  document.getElementById('btnStep').disabled  = false;
+}
+
+function stopAuto() {
+  clearInterval(autoTimer);
+  autoTimer = null;
+  document.getElementById('btnPause').disabled = true;
+}
+
+function resetSort() {
+  stopAuto();
+  steps = computeSteps(arr);
+  stepIdx = 0;
+  document.getElementById('btnStart').disabled = false;
+  document.getElementById('btnStep').disabled  = false;
+  render(steps[0]);
+}
+
+function randomArray() {
+  stopAuto();
+  const sizeInput = document.getElementById('arrSize');
+  const size = Math.min(15, Math.max(3, parseInt(sizeInput.value) || 7));
+  sizeInput.value = size;
+  arr = Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
+  resetSort();
+}
+
+function applySize() {
+  const sizeInput = document.getElementById('arrSize');
+  const size = Math.min(15, Math.max(3, parseInt(sizeInput.value) || 7));
+  sizeInput.value = size;
+  stopAuto();
+  arr = Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
+  resetSort();
+}
+
+function updateSpeed(v) {
+  delay = 1900 - Number(v);
+  document.getElementById('speedLabel').textContent = delay + 'ms';
+  if (autoTimer) { pauseAuto(); startAuto(); }
+}
+
+// ── 啟動 ──────────────────────────────────────────────
+steps = computeSteps(arr);
+render(steps[0]);
+</script>
+</body>
+</html>
