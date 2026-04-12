@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>雞尾酒排序法 視覺化</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;800&family=Outfit:wght@500;700&display=swap');
+
+    :root {
+      --bg-base: #081427;
+      --bg-soft: #0f2340;
+      --txt: #edf6ff;
+      --txt-dim: #c2d7eb;
+      --line: rgba(182, 224, 255, 0.34);
+      --glass: rgba(11, 25, 48, 0.42);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      color: var(--txt);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      background:
+        radial-gradient(900px 540px at 8% -10%, #1e7f9f 0%, transparent 62%),
+        radial-gradient(780px 520px at 96% 120%, #9e5747 0%, transparent 68%),
+        linear-gradient(135deg, var(--bg-base), var(--bg-soft));
+      overflow-x: hidden;
+    }
+
+    h1 {
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+      color: #ebf7ff;
+      text-shadow: 0 0 20px rgba(95, 212, 255, 0.28);
+    }
+
+    .subtitle {
+      color: var(--txt-dim);
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+
+    .back-home {
+      color: #f3fbff;
+      text-decoration: none;
+      border: 1px solid rgba(202, 233, 255, 0.6);
+      background: rgba(13, 28, 51, 0.44);
+      border-radius: 9999px;
+      padding: 6px 14px;
+      font-size: 0.88rem;
+      margin-bottom: 20px;
+      transition: transform .2s ease;
+    }
+
+    .back-home:hover { transform: translateY(-1px); }
+
+    .principle,
+    .chart-wrap,
+    .code-box,
+    .step-msg,
+    .info-pill,
+    .size-wrap {
+      backdrop-filter: blur(10px);
+    }
+
+    .principle {
+      background: var(--glass);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 24px;
+      max-width: 760px;
+      width: 100%;
+      margin-bottom: 28px;
+      line-height: 1.75;
+      font-size: 0.93rem;
+      color: #d7e8fa;
+    }
+
+    .principle strong { color: #ffd1bf; }
+
+    .info-bar {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .info-pill {
+      background: var(--glass);
+      border: 1px solid var(--line);
+      border-radius: 9999px;
+      padding: 6px 18px;
+      font-size: 0.88rem;
+      color: #c9dcf0;
+    }
+
+    .info-pill span { color: #f1f8ff; font-weight: 600; }
+
+    .step-msg {
+      background: rgba(8, 20, 39, 0.74);
+      border: 1px solid rgba(173, 220, 250, 0.38);
+      border-left: 4px solid #5fd2ff;
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-size: 0.93rem;
+      color: #e5f2ff;
+      margin-bottom: 22px;
+      text-align: center;
+      min-height: 42px;
+      max-width: 760px;
+      width: 100%;
+    }
+
+    .chart-wrap {
+      background: var(--glass);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px 24px 12px;
+      max-width: 760px;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 6px;
+      height: 260px;
+      background: rgba(8, 20, 39, 0.45);
+      border-radius: 10px;
+      border: 1px solid rgba(173, 220, 250, 0.22);
+      padding: 4px;
+    }
+
+    .bar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      max-width: 52px;
+    }
+
+    .bar {
+      width: 100%;
+      border-radius: 8px 8px 0 0;
+      transition: height 0.25s ease, background 0.2s;
+      background: #56cbff;
+      box-shadow: 0 0 14px rgba(86, 203, 255, 0.3);
+    }
+
+    .bar.comparing { background: #ffcb77; }
+    .bar.swapping { background: #ffae8e; }
+    .bar.sorted { background: #6de8a6; }
+
+    .bar-label {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: #bed3e8;
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      max-width: 760px;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    button {
+      padding: 10px 22px;
+      border: 1px solid rgba(224, 241, 255, 0.32);
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #f7fbff;
+      cursor: pointer;
+      background: linear-gradient(120deg, #24a9de, #3d8ee7);
+      transition: transform .18s ease, opacity .2s;
+    }
+
+    button:active { transform: scale(0.96); }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    #btnPause { background: linear-gradient(120deg, #ea9d4d, #db6f69); }
+    #btnStep { background: linear-gradient(120deg, #7ea7e8, #9d95e9); }
+    #btnReset { background: linear-gradient(120deg, #4e6582, #697d95); }
+    #btnRandom { background: linear-gradient(120deg, #21b67f, #1ecf8d); }
+    #btnApply {
+      background: linear-gradient(120deg, #cf6984, #a75a8f);
+      border-radius: 10px;
+      padding: 8px 16px;
+    }
+
+    .speed-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: #c7dbee;
+    }
+
+    input[type=range] { accent-color: #66d4ff; width: 110px; }
+
+    .size-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(8, 20, 39, 0.58);
+      border: 1px solid rgba(173, 220, 250, 0.25);
+      border-radius: 9999px;
+      padding: 6px 16px;
+      font-size: 0.88rem;
+      color: #c7dbee;
+    }
+
+    input[type=number] {
+      width: 56px;
+      padding: 4px 8px;
+      background: rgba(7, 18, 34, 0.82);
+      border: 1px solid rgba(177, 220, 249, 0.38);
+      border-radius: 7px;
+      color: #f1f8ff;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .code-box {
+      background: rgba(8, 20, 39, 0.74);
+      border: 1px solid rgba(173, 220, 250, 0.22);
+      border-radius: 12px;
+      padding: 18px 24px;
+      max-width: 760px;
+      width: 100%;
+      font-family: 'Consolas', monospace;
+      font-size: 0.88rem;
+      line-height: 1.9;
+      color: #c2d6eb;
+    }
+
+    .code-line { padding: 1px 8px; border-radius: 4px; transition: background 0.2s; }
+    .code-line.highlight { background: rgba(84, 153, 232, 0.26); color: #e7f2ff; }
+    .code-line .kw { color: #9fd4ff; }
+    .code-line .fn { color: #ffb9a2; }
+    .code-line .cm { color: #7692af; }
+    .code-line .num { color: #ffd095; }
+  </style>
+</head>
+<body>
+  <h1>🍸 雞尾酒排序法</h1>
+  <p class="subtitle">Cocktail Sort — 模擬實作內容</p>
+  <a class="back-home" href="index.html">← 回首頁</a>
+
+  <div class="principle">
+    <strong>原理：</strong>
+    雞尾酒排序法是雙向的 Bubble Sort。先由左到右把大值推到右端，再由右到左把小值推到左端。
+    <br/><br/>
+    ⏱ 時間複雜度：最佳 <strong>O(n)</strong>，平均 / 最差 <strong>O(n²)</strong>，空間複雜度 <strong>O(1)</strong>。
+  </div>
+
+  <div class="info-bar">
+    <div class="info-pill">輪次：<span id="infoPass">0</span></div>
+    <div class="info-pill">比較次數：<span id="infoCmp">0</span></div>
+    <div class="info-pill">交換次數：<span id="infoSwp">0</span></div>
+    <div class="info-pill">狀態：<span id="infoState">就緒</span></div>
+  </div>
+
+  <div class="step-msg" id="stepMsg">按「開始」自動播放，或按「單步」觀察雙向交換流程。</div>
+
+  <div class="chart-wrap">
+    <div class="bars" id="bars"></div>
+  </div>
+
+  <div class="controls">
+    <button id="btnStart" onclick="startAuto()">▶ 開始</button>
+    <button id="btnPause" onclick="pauseAuto()" disabled>⏸ 暫停</button>
+    <button id="btnStep" onclick="doStep()">👟 單步</button>
+    <button id="btnReset" onclick="resetSort()">↺ 重置</button>
+    <button id="btnRandom" onclick="randomArray()">🎲 亂數陣列</button>
+    <div class="size-wrap">
+      元素個數：
+      <input type="number" id="arrSize" min="3" max="15" value="8" onkeydown="if(event.key==='Enter') applySize()" />
+      <button id="btnApply" onclick="applySize()">套用</button>
+    </div>
+    <div class="speed-wrap">
+      🐢 <input type="range" id="speedRange" min="100" max="1800" step="100" value="700" oninput="updateSpeed(this.value)"> 🐇
+      <span id="speedLabel">700ms</span>
+    </div>
+  </div>
+
+  <div class="code-box" id="codeBox">
+    <div class="code-line" id="cl0"><span class="kw">function</span> <span class="fn">cocktailSort</span>(arr) {</div>
+    <div class="code-line" id="cl1">&nbsp;&nbsp;<span class="kw">let</span> start = <span class="num">0</span>, end = arr.length - <span class="num">1</span>;</div>
+    <div class="code-line" id="cl2">&nbsp;&nbsp;<span class="kw">let</span> swapped = <span class="kw">true</span>;</div>
+    <div class="code-line" id="cl3">&nbsp;&nbsp;<span class="kw">while</span> (swapped) {</div>
+    <div class="code-line" id="cl4">&nbsp;&nbsp;&nbsp;&nbsp;swapped = <span class="kw">false</span>; <span class="cm">// 左到右</span></div>
+    <div class="code-line" id="cl5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 右到左再做一次</span></div>
+    <div class="code-line" id="cl6">&nbsp;&nbsp;}</div>
+    <div class="code-line" id="cl7">}</div>
+  </div>
+
+<script>
+let arr = [64, 34, 25, 12, 22, 11, 90, 45];
+const MAX_H = 220;
+let steps = [];
+let stepIdx = 0;
+let autoTimer = null;
+let delay = 700;
+
+function computeSteps(a) {
+  const s = [];
+  const data = [...a];
+  let start = 0;
+  let end = data.length - 1;
+  let swapped = true;
+  let pass = 0;
+  let cmp = 0;
+  let swp = 0;
+
+  s.push({ arr: [...data], start, end, pass, cmp, swp, msg: '開始雞尾酒排序', code: 0 });
+
+  while (swapped) {
+    swapped = false;
+    pass++;
+
+    for (let j = start; j < end; j++) {
+      cmp++;
+      s.push({ arr: [...data], j, start, end, pass, cmp, swp, msg: `正向比較 ${data[j]} 與 ${data[j + 1]}`, code: 4, phase: 'compare' });
+      if (data[j] > data[j + 1]) {
+        [data[j], data[j + 1]] = [data[j + 1], data[j]];
+        swp++;
+        swapped = true;
+        s.push({ arr: [...data], j, start, end, pass, cmp, swp, msg: `正向交換位置 ${j} 與 ${j + 1}`, code: 4, phase: 'swap' });
+      }
+    }
+
+    if (!swapped) break;
+
+    end--;
+    swapped = false;
+    pass++;
+
+    for (let j = end; j > start; j--) {
+      cmp++;
+      s.push({ arr: [...data], j: j - 1, start, end, pass, cmp, swp, msg: `反向比較 ${data[j - 1]} 與 ${data[j]}`, code: 5, phase: 'compare' });
+      if (data[j - 1] > data[j]) {
+        [data[j - 1], data[j]] = [data[j], data[j - 1]];
+        swp++;
+        swapped = true;
+        s.push({ arr: [...data], j: j - 1, start, end, pass, cmp, swp, msg: `反向交換位置 ${j - 1} 與 ${j}`, code: 5, phase: 'swap' });
+      }
+    }
+
+    start++;
+  }
+
+  s.push({ arr: [...data], start, end, pass, cmp, swp, msg: '排序完成', code: 7, done: true });
+  return s;
+}
+
+function render(state) {
+  const wrap = document.getElementById('bars');
+  wrap.innerHTML = '';
+  const maxVal = Math.max(...state.arr);
+
+  state.arr.forEach((v, idx) => {
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    const h = Math.max(18, Math.round((v / maxVal) * MAX_H));
+    bar.style.height = h + 'px';
+
+    if (state.done || idx < state.start || idx > state.end) {
+      bar.classList.add('sorted');
+    } else if (idx === state.j || idx === state.j + 1) {
+      bar.classList.add(state.phase === 'swap' ? 'swapping' : 'comparing');
+    }
+
+    const lbl = document.createElement('div');
+    lbl.className = 'bar-label';
+    lbl.textContent = v;
+
+    col.appendChild(bar);
+    col.appendChild(lbl);
+    wrap.appendChild(col);
+  });
+
+  document.getElementById('stepMsg').textContent = state.msg;
+  document.getElementById('infoPass').textContent = state.pass;
+  document.getElementById('infoCmp').textContent = state.cmp;
+  document.getElementById('infoSwp').textContent = state.swp;
+  document.getElementById('infoState').textContent = stepIdx === steps.length - 1 ? '完成 ✅' : (autoTimer ? '播放中' : '暫停');
+
+  for (let k = 0; k <= 7; k++) {
+    const el = document.getElementById('cl' + k);
+    if (el) el.classList.remove('highlight');
+  }
+  const cur = document.getElementById('cl' + state.code);
+  if (cur) cur.classList.add('highlight');
+}
+
+function doStep() {
+  if (stepIdx < steps.length - 1) {
+    stepIdx++;
+    render(steps[stepIdx]);
+  }
+  if (stepIdx === steps.length - 1) {
+    stopAuto();
+    document.getElementById('btnStart').disabled = true;
+    document.getElementById('btnStep').disabled = true;
+  }
+}
+
+function startAuto() {
+  if (stepIdx >= steps.length - 1) return;
+  document.getElementById('btnStart').disabled = true;
+  document.getElementById('btnPause').disabled = false;
+  document.getElementById('btnStep').disabled = true;
+  autoTimer = setInterval(() => {
+    if (stepIdx >= steps.length - 1) {
+      stopAuto();
+      return;
+    }
+    doStep();
+  }, delay);
+}
+
+function pauseAuto() {
+  stopAuto();
+  document.getElementById('btnStart').disabled = false;
+  document.getElementById('btnPause').disabled = true;
+  document.getElementById('btnStep').disabled = false;
+}
+
+function stopAuto() {
+  clearInterval(autoTimer);
+  autoTimer = null;
+  document.getElementById('btnPause').disabled = true;
+}
+
+function resetSort() {
+  stopAuto();
+  steps = computeSteps(arr);
+  stepIdx = 0;
+  document.getElementById('btnStart').disabled = false;
+  document.getElementById('btnStep').disabled = false;
+  render(steps[0]);
+}
+
+function randomArray() {
+  stopAuto();
+  const sizeInput = document.getElementById('arrSize');
+  const size = Math.min(15, Math.max(3, parseInt(sizeInput.value) || 8));
+  sizeInput.value = size;
+  arr = Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
+  resetSort();
+}
+
+function applySize() {
+  const sizeInput = document.getElementById('arrSize');
+  const size = Math.min(15, Math.max(3, parseInt(sizeInput.value) || 8));
+  sizeInput.value = size;
+  stopAuto();
+  arr = Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
+  resetSort();
+}
+
+function updateSpeed(v) {
+  delay = 1900 - Number(v);
+  document.getElementById('speedLabel').textContent = delay + 'ms';
+  if (autoTimer) {
+    pauseAuto();
+    startAuto();
+  }
+}
+
+steps = computeSteps(arr);
+render(steps[0]);
+</script>
+</body>
+</html>

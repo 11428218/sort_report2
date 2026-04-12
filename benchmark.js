@@ -92,6 +92,38 @@ function quickSort(input) {
   return arr;
 }
 
+function cocktailSort(input) {
+  const arr = input.slice();
+  let start = 0;
+  let end = arr.length - 1;
+  let swapped = true;
+
+  while (swapped) {
+    swapped = false;
+    for (let i = start; i < end; i++) {
+      if (arr[i] > arr[i + 1]) {
+        [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
+        swapped = true;
+      }
+    }
+
+    if (!swapped) break;
+
+    swapped = false;
+    end--;
+
+    for (let i = end; i > start; i--) {
+      if (arr[i - 1] > arr[i]) {
+        [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
+        swapped = true;
+      }
+    }
+    start++;
+  }
+
+  return arr;
+}
+
 function isSorted(arr) {
   for (let i = 1; i < arr.length; i++) {
     if (arr[i - 1] > arr[i]) return false;
@@ -121,7 +153,7 @@ const algorithms = {
   Selection: selectionSort,
   Insertion: insertionSort,
   Merge: mergeSort,
-  Quick: quickSort,
+  Cocktail: cocktailSort,
 };
 
 const sizes = [100, 500, 1000, 2000, 4000];
